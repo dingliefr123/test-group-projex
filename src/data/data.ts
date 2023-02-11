@@ -140,3 +140,4 @@ const projects: ProjectModel[] = [
 ]
 
 
+export default projects

@@ -1,0 +1,8 @@
+.barItem {
+  padding: 10px;
+  &.active {
+    background: rgb(209, 225, 236);
+    font-weight: bold;
+    color: #333;
+  }
+}
