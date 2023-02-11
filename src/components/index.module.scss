@@ -1,8 +1,65 @@
-.barItem {
+.bar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 10px;
-  &.active {
-    background: rgb(209, 225, 236);
-    font-weight: bold;
-    color: #333;
+  cursor: pointer;
+}
+
+.bar-item.active {
+  background: rgb(209, 225, 236);
+  font-weight: bold;
+  color: #333;
+}
+
+.right-bar-container {
+  width: 100%;
+  .list {
+    height: 300px;
   }
+}
+
+.row-with-title {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.row-with-title-span {
+  display: inline-block;
+  margin-left: 5px;
+}
+
+.row-with-title-span.selected {
+  color: #333;
+  font-weight: bold;
+}
+
+.span-placceholder {
+  display: inline-block;
+  width: 14px;
+}
+
+.btn {
+  width: fit-content;
+  padding: 10px 20px;
+  background-color: rgb(2, 34, 78);
+  color: #fff;
+}
+
+.search {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border: 1px solid rgb(236, 249, 243);
+  padding: 6px 5px;
+  input {
+    width: 80%;
+    border: none;
+    outline: none;
+  }
+}
+
+.search:focus {
+  border-color: rgb(2, 34, 78);
 }
