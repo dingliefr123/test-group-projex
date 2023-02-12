@@ -14,8 +14,12 @@
 
 .right-bar-container {
   width: 100%;
-  .list {
+  .list-wrapper {
     height: 300px;
+    overflow-y: auto;
+    .list {
+      min-height: 140px;
+    }
   }
 }
 
@@ -28,11 +32,10 @@
 .row-with-title-span {
   display: inline-block;
   margin-left: 5px;
-}
-
-.row-with-title-span.selected {
-  color: #333;
-  font-weight: bold;
+  &.selected {
+    color: #333;
+    font-weight: bold;
+  }
 }
 
 .span-placceholder {

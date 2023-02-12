@@ -1,31 +1,77 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { ProjectModel, ProjectStatusEnum } from "../models/ProjectModel";
-import { GLOBAL_CONTEXT, ACTION_TYPE_ENUM } from "../reducer";
-import { Affiche, LeftBarEnum } from "../typing";
-import { CircleMinnus, CirclePlus, SearchIcon } from "../icons";
+import { GLOBAL_CONTEXT, ACTION_TYPE_ENUM, Action } from "../reducer";
+import { Affaire, LeftBarEnum } from "../typing";
+import { CircleMinnus, CirclePlus, SearchIcon, RemoveIcon } from "../icons";
 import styles from "./index.module.scss";
+import { filterArrBySearchKw, throttle } from "../utils";
 
 interface IMiddleContent {
   projets: ProjectModel[];
-  affiches: Affiche[];
+  affaires: Affaire[];
+  dispatch: React.Dispatch<Action>
 }
-
-const Search: React.FC = () => {
+const startSearchThrottle = throttle();
+const Search: React.FC<{
+  dispatch?: React.Dispatch<Action>
+}> = ({ dispatch }) => {
+  const [ keyword, setKeyW ] = useState('');
+  const changeHandler = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const value = ev.currentTarget.value;
+    setKeyW(value);
+    startSearchThrottle(() =>
+      dispatch?.({ type: ACTION_TYPE_ENUM.TOGGLE_SEARCH, payload: value }));
+  };
+  const removeIconhandler = () => {
+    setKeyW('');
+    dispatch?.({ type: ACTION_TYPE_ENUM.TOGGLE_SEARCH, payload: '' })
+  }
   return (
     <div className={styles.search}>
-      <input />
-      <SearchIcon />
+      <input value={keyword} onChange={changeHandler} />
+      {
+        keyword ? <RemoveIcon onClick={removeIconhandler} /> : <SearchIcon />
+      }
     </div>
   );
 };
 
-const RowWithTitleAndOperBtn: React.FC<{
+function getSelectedClass(selected: boolean | undefined) {
+  return [
+    styles["row-with-title-span"],
+    selected ? styles.selected : "",
+  ].join(" ");
+}
+
+const RowTitleEmphaszingSearchKw: React.FC<{
+  title: string,
+  keyword?: string,
+  selected?: boolean
+  noBold?: boolean
+}> = ({ keyword, selected, title, noBold }) => {
+  if (noBold)
+    return <span className={styles["row-with-title-span"]}>{ title }</span>
+  if (!keyword)
+    return <span className={getSelectedClass(selected)}>{ title }</span>
+  const startIdx = title.indexOf(keyword), 
+    endIdx = startIdx + keyword.length;
+  return <span className={styles["row-with-title-span"]}>
+    { title.substring(0, startIdx) }
+    <span className={getSelectedClass(true)}>{ title.substring(startIdx, endIdx) }</span>
+    { title.slice(endIdx) }
+  </span>
+  
+}
+
+export const RowWithTitleAndOperBtn: React.FC<{
   title: string;
+  clickHandler?: () => void;
   dim?: boolean;
   selected?: boolean;
-  clickHandler: () => void;
   children?: React.ReactElement | null;
-}> = ({ title, dim, selected, clickHandler, children }) => (
+  keyword?: string
+  noBold?: boolean
+}> = ({ title, dim, selected, clickHandler, children, keyword,noBold }) => (
   <div
     className={`${dim ? "dim-text" : ""} ${styles["row-with-title"]}`}
     onClick={clickHandler}
@@ -37,14 +83,12 @@ const RowWithTitleAndOperBtn: React.FC<{
     ) : (
       <CirclePlus />
     )}
-    <span
-      className={[
-        styles["row-with-title-span"],
-        selected ? "selected" : "",
-      ].join(" ")}
-    >
-      {title}
-    </span>
+    <RowTitleEmphaszingSearchKw
+      title={title}
+      keyword={keyword}
+      selected={selected}
+      noBold={noBold}
+    />
     {children ?? null}
   </div>
 );
@@ -53,12 +97,13 @@ const ProjetList: React.FC<{
   projets: ProjectModel[];
   selectedProjIds: string[];
   selectHandler: (id: string) => void;
-}> = ({ projets, selectedProjIds, selectHandler }) => {
+  keyword: string
+}> = ({ projets, selectedProjIds, selectHandler, keyword }) => {
   return (
     <div>
       {projets.map((item) => {
         const isArchived = item.status === ProjectStatusEnum.ARCHIVED;
-        const clickHandler = () => selectHandler(item.id);
+        const clickHandler = () => selectHandler(item.id)
         return (
           <RowWithTitleAndOperBtn
             key={item.id}
@@ -66,6 +111,7 @@ const ProjetList: React.FC<{
             dim={isArchived}
             clickHandler={clickHandler}
             selected={selectedProjIds.includes(item.id)}
+            keyword={keyword}
           >
             {isArchived ? <span className="dim-text">(Archived)</span> : null}
           </RowWithTitleAndOperBtn>
@@ -76,28 +122,29 @@ const ProjetList: React.FC<{
 };
 
 const AfficheList: React.FC<{
-  affiches: Affiche[];
+  affaires: Affaire[];
   selectedAffairIds: number[];
   selectHandler: (id: number) => void;
-}> = ({ affiches, selectedAffairIds, selectHandler }) => {
-  const projetsIncludingAffiches = useMemo(() => {
-    const map: Record<string, Affiche[]> = {};
-    for (const affich of affiches) {
+  keyword: string
+}> = ({ affaires, selectedAffairIds, selectHandler, keyword }) => {
+  const projetsIncludingAffaires = useMemo(() => {
+    const map: Record<string, Affaire[]> = {};
+    for (const affich of affaires) {
       const pName = affich.pName;
       if (pName in map) map[pName].push(affich);
       else map[pName] = [affich];
     }
     return Object.values(map);
-  }, [affiches]);
+  }, [affaires]);
 
   return (
     <div>
-      {projetsIncludingAffiches.map((affiches) => {
-        const { pName } = affiches[0];
+      {projetsIncludingAffaires.map((affaires) => {
+        const { pName } = affaires[0];
         return (
           <React.Fragment key={pName}>
             <h4>{pName}</h4>
-            {affiches.map((item) => {
+            {affaires.map((item) => {
               const clickHandler = () => selectHandler(item.id);
               return (
                 <RowWithTitleAndOperBtn
@@ -105,6 +152,7 @@ const AfficheList: React.FC<{
                   title={item.name}
                   clickHandler={clickHandler}
                   selected={selectedAffairIds.includes(item.id)}
+                  keyword={keyword}
                 />
               );
             })}
@@ -118,28 +166,48 @@ const AfficheList: React.FC<{
 const ListWrapper: React.FC<
   IMiddleContent & {
     ProjetListRender: typeof ProjetList;
-    AffichesRender: typeof AfficheList;
+    AffairesRender: typeof AfficheList;
   }
-> = ({ ProjetListRender, projets, affiches }) => {
+> = ({ ProjetListRender, projets, affaires }) => {
   const { state, dispatch } = useContext(GLOBAL_CONTEXT);
   const selectHandler = (type: ACTION_TYPE_ENUM) => (id: number | string) => {
     dispatch({ type, payload: id });
   };
+  const isProjet = state.activeBarKey === LeftBarEnum.PROJETS
+  const {
+    filteredAffaires,
+    filteredProjets,
+  } = useMemo(() => {
+    let filteredProjets = projets,
+    filteredAffaires = affaires;
+    const { searchKeyword } = state;
+    if (searchKeyword) {
+      if (isProjet)
+        filteredProjets = filterArrBySearchKw(filteredProjets, searchKeyword)
+      else
+        filteredAffaires = filterArrBySearchKw(filteredAffaires, searchKeyword)
+    }
+    return { filteredAffaires, filteredProjets }
 
-  if (state.activeBarKey === LeftBarEnum.PROJETS)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ state ]);
+
+  if (isProjet)
     return (
       <ProjetListRender
-        projets={projets}
+        projets={filteredProjets}
         selectedProjIds={state.selectedProjetIds || []}
         selectHandler={selectHandler(ACTION_TYPE_ENUM.TOGGLE_SELECT_PROJET)}
+        keyword={state.searchKeyword || ''}
       />
     );
 
   return (
     <AfficheList
-      affiches={affiches || []}
+      affaires={filteredAffaires}
       selectedAffairIds={state.selectedAffairIds || []}
       selectHandler={selectHandler(ACTION_TYPE_ENUM.TOGGLR_SELECT_AFFAIRE)}
+      keyword={state.searchKeyword || ''}
     />
   );
 };
@@ -147,11 +215,11 @@ const ListWrapper: React.FC<
 const MiddleContent: React.FC<IMiddleContent> = (props) => {
   return (
     <div>
-      <Search />
+      <Search dispatch={props.dispatch} />
       <ListWrapper
         {...props}
         ProjetListRender={ProjetList}
-        AffichesRender={AfficheList}
+        AffairesRender={AfficheList}
       />
     </div>
   );

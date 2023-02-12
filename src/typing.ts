@@ -9,4 +9,4 @@ export enum LeftBarEnum {
 
 export const LeftBarItem = Object.values(LeftBarEnum)
 
-export type Affiche = AffairModel & { pName: string };
+export type Affaire = AffairModel & { pName: string };

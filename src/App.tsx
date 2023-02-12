@@ -1,6 +1,6 @@
 import {
   DEL_EXCLUDEDE_DATA as Projets,
-  AFFICHES as Affiches
+  Affaires
 } from './utils';
 import styles from './App.module.scss';
 import { useCallback, useReducer } from 'react';
@@ -9,8 +9,7 @@ import { LeftBar, RightBar, MiddleContent } from './components'
 import { LeftBarEnum } from './typing';
 
 const App: React.FC = () => {
-  const [state, dispatch] =
-    useReducer(reducer, initiaState);
+  const [state, dispatch] = useReducer(reducer, initiaState);
 
   const setActiveBarIdx = useCallback((barIdx: LeftBarEnum) => {
     if ([LeftBarEnum.ENTITES,LeftBarEnum.CLIENTS].includes(barIdx))
@@ -24,9 +23,15 @@ const App: React.FC = () => {
         <LeftBar activeIdx={state.activeBarKey} setActiveIdx={setActiveBarIdx} />
         <MiddleContent
           projets={Projets}
-          affiches={Affiches}
+          affaires={Affaires}
+          dispatch={dispatch}
         />
-        <RightBar />
+        <RightBar
+          projets={Projets}
+          affaires={Affaires}
+          dispatch={dispatch}
+          confirmedIds={state.confirmedIds}
+        />
       </div>
     </GLOBAL_CONTEXT.Provider>
   )
