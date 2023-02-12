@@ -28,10 +28,18 @@ export function filterArrBySearchKw<K extends Affaire | ProjectModel>(arr: K[], 
 
 export function throttle(timeout = 500) {
   let id: NodeJS.Timeout | null = null
+  let lastCall: Function | null
   return function(fun: Function) {
-    if (id) return
+    if (id) {
+      lastCall = fun
+      return
+    }
     id = setTimeout(() => {
-      fun()
+      if (lastCall)
+        lastCall()
+      else
+        fun()
+      lastCall = null;
       id = null;
     }, timeout) as any as NodeJS.Timeout;
   }
@@ -43,4 +51,8 @@ export function getCOnfirmedIdsFromState(state: State) {
     affaires:selectedAffairIds.slice(),
     projets: selectedProjetIds.slice()
   }
+}
+
+export function getIdxRandomlly(len: number) {
+  return Math.floor(Math.random() * len) 
 }

@@ -12,7 +12,7 @@ interface IMiddleContent {
   dispatch: React.Dispatch<Action>
 }
 const startSearchThrottle = throttle();
-const Search: React.FC<{
+export const Search: React.FC<{
   dispatch?: React.Dispatch<Action>
 }> = ({ dispatch }) => {
   const [ keyword, setKeyW ] = useState('');
@@ -27,8 +27,8 @@ const Search: React.FC<{
     dispatch?.({ type: ACTION_TYPE_ENUM.TOGGLE_SEARCH, payload: '' })
   }
   return (
-    <div className={styles.search}>
-      <input value={keyword} onChange={changeHandler} />
+    <div className={styles.search} data-testid="search">
+      <input value={keyword} onChange={changeHandler} data-testid="input" />
       {
         keyword ? <RemoveIcon onClick={removeIconhandler} /> : <SearchIcon />
       }
@@ -63,6 +63,19 @@ const RowTitleEmphaszingSearchKw: React.FC<{
   
 }
 
+const getRowClassname = ({ 
+  dim,
+  selected
+}: Pick<
+  Parameters<typeof RowWithTitleAndOperBtn>[0],
+  'dim' | 'selected'
+  >
+) => [
+  styles["row-with-title"],
+  dim ? "dim-text" : "",
+  selected ? 'selected' : ''
+].join(' ');
+
 export const RowWithTitleAndOperBtn: React.FC<{
   title: string;
   clickHandler?: () => void;
@@ -73,8 +86,9 @@ export const RowWithTitleAndOperBtn: React.FC<{
   noBold?: boolean
 }> = ({ title, dim, selected, clickHandler, children, keyword,noBold }) => (
   <div
-    className={`${dim ? "dim-text" : ""} ${styles["row-with-title"]}`}
+    className={getRowClassname({ dim, selected })}
     onClick={clickHandler}
+    data-testid='oper-row'
   >
     {dim ? (
       <span className={styles["span-placceholder"]}></span>
@@ -100,7 +114,7 @@ const ProjetList: React.FC<{
   keyword: string
 }> = ({ projets, selectedProjIds, selectHandler, keyword }) => {
   return (
-    <div>
+    <div data-testid="projet-list">
       {projets.map((item) => {
         const isArchived = item.status === ProjectStatusEnum.ARCHIVED;
         const clickHandler = () => selectHandler(item.id)
@@ -121,7 +135,7 @@ const ProjetList: React.FC<{
   );
 };
 
-const AfficheList: React.FC<{
+const AffaireList: React.FC<{
   affaires: Affaire[];
   selectedAffairIds: number[];
   selectHandler: (id: number) => void;
@@ -138,7 +152,7 @@ const AfficheList: React.FC<{
   }, [affaires]);
 
   return (
-    <div>
+    <div data-testid="affaire-list">
       {projetsIncludingAffaires.map((affaires) => {
         const { pName } = affaires[0];
         return (
@@ -166,7 +180,7 @@ const AfficheList: React.FC<{
 const ListWrapper: React.FC<
   IMiddleContent & {
     ProjetListRender: typeof ProjetList;
-    AffairesRender: typeof AfficheList;
+    AffairesRender: typeof AffaireList;
   }
 > = ({ ProjetListRender, projets, affaires }) => {
   const { state, dispatch } = useContext(GLOBAL_CONTEXT);
@@ -203,7 +217,7 @@ const ListWrapper: React.FC<
     );
 
   return (
-    <AfficheList
+    <AffaireList
       affaires={filteredAffaires}
       selectedAffairIds={state.selectedAffairIds || []}
       selectHandler={selectHandler(ACTION_TYPE_ENUM.TOGGLR_SELECT_AFFAIRE)}
@@ -214,12 +228,12 @@ const ListWrapper: React.FC<
 
 const MiddleContent: React.FC<IMiddleContent> = (props) => {
   return (
-    <div>
+    <div data-testid="middle-content">
       <Search dispatch={props.dispatch} />
       <ListWrapper
         {...props}
         ProjetListRender={ProjetList}
-        AffairesRender={AfficheList}
+        AffairesRender={AffaireList}
       />
     </div>
   );

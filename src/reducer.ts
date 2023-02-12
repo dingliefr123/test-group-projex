@@ -41,10 +41,12 @@ export type Payload = string | number | LeftBarEnum;
 
 export type Action = { type: ACTION_TYPE; payload: any };
 
-export const GLOBAL_CONTEXT = createContext<{
+export type GlobalContextType = {
   dispatch: React.Dispatch<Action>;
   state: Partial<State>;
-}>({} as any);
+}
+
+export const GLOBAL_CONTEXT = createContext<GlobalContextType>({} as any);
 
 export function reducer(state: State, { type, payload }: Action) {
   switch (type) {

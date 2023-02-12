@@ -12,7 +12,11 @@ const Item: React.FC<{
   const className = [styles["bar-item"], activeClass].join(" ");
   const onClick = () => setActiveIdx(idx);
   return (
-    <div className={className} onClick={onClick}>
+    <div
+      className={className}
+      onClick={onClick}
+      data-testid="left-bar-item"
+    >
       {title}
       <RightIcon />
     </div>
@@ -24,7 +28,7 @@ const LeftBar: React.FC<{
   setActiveIdx: (idx: LeftBarEnum) => void;
 }> = ({ activeIdx, setActiveIdx }) => {
   return (
-    <div className="big-text">
+    <div className="big-text" data-testid="left-bar">
       {LeftBarItem.map((title, idx) => (
         <Item
           key={idx}

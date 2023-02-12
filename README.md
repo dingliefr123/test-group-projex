@@ -1,23 +1,71 @@
-# Contexte
+# L'exercice de Groupe ProjeX
 
-Vous développez une application de gestion de projets sur laquelle des utilisateurs peuvent créer des projets.
-Dans les projets, les utilisateurs peuvent créer des affaires.
+Bonjour, madame ou Monsieur. Merci d'avoir consulté cette repo, tout d'abord, je vais vous expliquer la structure ce project.
 
-# Exercice
+Les fichers de logiciels sont réalisés par typescript, `.ts` ou `.tsx`, dans la répertoire `./src`. Vous pouvez exécuter les commands `npm run start`, `npm run test`, rappelez qu'il faut installer les dépandances à l'avant, donc je vous recommande d'installer les dépandances par `npm install`.
 
-Vous avez besoin d'un composant permettant de sélectionner des projets et des affaires parmi une liste.
+Je n'ai pas utilisé les autres libraires, sauf que `@testing-library/react` pour les tests unitaires. Tous composants sont en **React Hooks**, management de l'état est par `reducer + context`. Et le styling est par `SASS module`, les fichers comme `**.module.scss`, vous pouvez regarder dans la structure de la répertoire au-dessous.
 
-- Le composant doit contenir deux onglets : Projets et Affaires,
-- Le composant doit intégrer les affaires les projets via des props,
-- Dans un onglet, l'utilisateur doit pouvoir sélectionner des projets et des affaires,
-- Un résumé de la sélection doit être affiché,
-- Un bouton "Confirmer" retournera un objet contenant toute la sélection.
+Les demandes de ce test sont dans le ficher `./README_DEMANDES.md`.
 
-Un designer vous a créé une UI (cf. ui.png) qui vous reste à implémenter. 
+## La répertoire
 
-⚠️ Ignorez les onglets Entités et Clients dans le design. ⚠️
+```bash
+│── App.module.scss # styling
+│── App.tsx # le root composant, pour initialiser le context, reducer et importer les donneés
+│── custom.d.ts # pour rendre compatible les fichers de module scss
+│── index.css # le ficher original
+│── index.tsx # le ficher original
+│── reducer.ts # le ficher de 'reducer', qui est nécessaire à 'useReducer'
+│── typing.ts # pout stocker quelques types, enums
+├───components
+│     │── index.module.scss # le ficher de styling pour tous les composants
+│     │── index.ts # rien de logiciel, juste pour exporter
+│     │── LeftBar.tsx # la partie douche de l'interface, qui vous permets de changer entre 'Projets' et 'Affaires'
+│     │── MiddleContent.tsx # la partie centre, qui vous montre tous les Projets' ou 'Affaires' et vous permets de changer falire les cherches
+│     └── RightBar.tsx # la partie droite de l'interface, qui vous permets de confirmer tous les choses choisises
+├───data
+│     └── data.ts # le ficher original
+├───icons # les SVG icons, rien de spécial
+│     │── CircleMinus.tsx
+│     │── CirclePlus.tsx
+│     │── index.ts
+│     │── RemoveIcon.tsx
+│     │── RightIcon.tsx
+│     └── Search.tsx
+├───models
+│     │── AffairModel.ts # le ficher original
+│     └── ProjectModel.ts # le ficher original
+├───tests
+│     │── App.test.tsx # les tests unitaires pour le composant 'App', 'LeftBar' et 'RightBar'
+│     │── MiddleContent.test.tsx # les tests unitaires pour le composant 'MiddleContent'
+│     └── reducer.test.ts # les tests unitaires pour le reducer
+└───utils
+      └── index.ts # les fontions auxilliaires
+```
 
-# Note
-- Le but n'est pas de finir entièrement le composant en 2 heures. Ce n'est pas faisable.
-- L'objectif est de jauger votre capacité à aborder un problème et de structurer une solution.
-- Concentrez-vous en priorité sur l'algorithmie et les fonctionnalités plutôt que le design UI et le CSS.
+## Les fonctions realisés
+
+### Basculer entre 'Projets' et 'Affaires'
+
+![Preview Image](./doc/1er_fun.png)
+![Preview Image](./doc/1er_fun_2.png)
+
+### Choisir les 'Projets' ou 'Affaires'
+
+![Preview Image](./doc/2ieme_fun.png)
+
+### Confirmer et Annuler quelques choses confirmées
+
+![Preview Image](./doc/2ieme_fun_2.png)
+![Preview Image](./doc/annuler_la_confirmation.png)
+
+### Recherche
+
+![Preview Image](./doc/recherche.png)
+
+## L'amélioration possibles
+
+Pour la solution de managemet de l'état, ou peut utillser `redux + reselctor` ou les autres à améliorer la performance. `reducer + context` ne peut pas assurer la fiabilité qnand le projet s'agrondit.
+
+Et pour les tests, `End2End` tests ne sont pas introduits. Dans ce cas, ce n'est pas grave. Mais quand il s'agit des demandes assez compliqués, par exemple beaucoup des ajax et beaucoup des operations de `localStroage` et quelques autres appelés de APIs des navigateirs, `End2End` tests sont inévitables.

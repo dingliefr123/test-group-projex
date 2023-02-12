@@ -57,7 +57,7 @@ const RightBar: React.FC<IRightBar> = ({ projets, affaires, dispatch, confirmedI
   }, [dispatch])
 
   return (
-    <div className={styles["right-bar-container"]}>
+    <div className={styles["right-bar-container"]} data-testid="right-bar">
       <h2>SÉLECTION</h2>
       <div className={styles['list-wrapper']}>
         <List type="Projet" arr={confirmedP} clickHandler={clickHandler('projets')} />
